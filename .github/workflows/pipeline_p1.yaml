@@ -10,15 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      # 1. Checkout del código
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Build Docker image
-      run: |
-        docker build -t ld-demo:latest -f app/Dockerfile app/
+      # 2. Login en DockerHub
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Show Docker images
-      run: docker images
+      # 3. Build de la imagen
+      - name: Build Docker image
+        run: |
+          docker build -t drearchino624/ld-demo:latest ./app
 
-    - name: Deploy to Kubernetes (simulado)
-      run: echo "Aquí iría kubectl apply -f k8s/deployment.yaml"
+      # 4. Push de la imagen
+      - name: Push Docker image
+        run: |
+          docker push drearchino624/ld-demo:latest
+
+      # 5. (Opcional) Ac

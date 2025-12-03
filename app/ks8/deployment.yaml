@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ld-demo-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ld-demo
+  template:
+    metadata:
+      labels:
+        app: ld-demo
+    spec:
+      containers:
+      - name: ld-demo
+        image: paulo/ld-k8s-demo:latest  # luego el pipeline reemplaza el tag
+        imagePullPolicy: Always

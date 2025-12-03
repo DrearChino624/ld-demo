@@ -1,0 +1,33 @@
+name: Pipeline-P1
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Docker login
+      run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+
+    - name: Build image
+      run: docker build -t drearchino624/ld-k8s-demo:${{ github.sha }} ./app
+
+    - name: Push image
+      run: docker push drearchino624/ld-k8s-demo:${{ github.sha }}
+
+    - name: Update Kubernetes manifests
+      run: |
+        sed -i "s|image:.*|image: drearchino624/ld-k8s-demo:${{ github.sha }}|g" k8s/deployment.yaml
+
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+        git commit -am "Update image to ${{ github.sha }}"
+        git push

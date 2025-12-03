@@ -10,24 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
+    - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Docker login
-      run: echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
-
-    - name: Build image
-      run: docker build -t drearchino624/ld-k8s-demo:${{ github.sha }} ./app
-
-    - name: Push image
-      run: docker push drearchino624/ld-k8s-demo:${{ github.sha }}
-
-    - name: Update Kubernetes manifests
+    - name: Build Docker image
       run: |
-        sed -i "s|image:.*|image: drearchino624/ld-k8s-demo:${{ github.sha }}|g" k8s/deployment.yaml
+        docker build -t ld-demo:latest -f app/Dockerfile app/
 
-        git config --global user.email "actions@github.com"
-        git config --global user.name "GitHub Actions"
+    - name: Show Docker images
+      run: docker images
 
-        git commit -am "Update image to ${{ github.sha }}"
-        git push
+    - name: Deploy to Kubernetes (simulado)
+      run: echo "Aquí iría kubectl apply -f k8s/deployment.yaml"

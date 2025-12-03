@@ -1,18 +1,19 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ld-demo-deploy
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ld-demo
-  template:
-    metadata:
-      labels:
-        app: ld-demo
-    spec:
-      containers:
-      - name: ld-demo
-        image: paulo/ld-k8s-demo:latest  # luego el pipeline reemplaza el tag
-        imagePullPolicy: Always
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Login to DockerHub
+      run: |
+        echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+    - name: Build Docker image
+      run: |
+        docker build -f app/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/ld-demo:latest app
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/ld-demo:latest
